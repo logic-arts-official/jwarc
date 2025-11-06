@@ -1,7 +1,32 @@
 # jwarc [![](https://maven-badges.herokuapp.com/maven-central/org.netpreserve/jwarc/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.netpreserve/jwarc) [![](https://www.javadoc.io/badge/org.netpreserve/jwarc.svg)](https://www.javadoc.io/doc/org.netpreserve/jwarc)
-A Java library for reading and writing WARC files. This library includes a high level API modeling
-the standard record types as individual classes with typed accessors. The API is exensible and you can register
+
+A high-performance Java library for reading and writing WARC (Web ARChive) files. This library includes a high-level API modeling
+the standard record types as individual classes with typed accessors. The API is extensible and you can register
 extension record types and accessors for extension header fields.
+
+## Documentation
+
+- **[API Reference](API-REFERENCE.md)** - Quick reference guide for common APIs
+- **[Architecture](ARCHITECTURE.md)** - Design and implementation details
+- **[Contributing](CONTRIBUTING.md)** - Guide for developers and contributors
+- **[Changelog](CHANGELOG.md)** - Version history and release notes
+- **[JavaDoc](https://www.javadoc.io/doc/org.netpreserve/jwarc)** - Complete API documentation
+
+## Features
+
+- **High-level typed API** for WARC record types
+- **High-performance parsing** using Ragel finite state machine
+- **Multiple compression formats**: GZIP, Zstandard (zstd), and Brotli
+- **Protocol support**: HTTP, HTTPS, Gemini
+- **Lenient parsing** modes for handling non-compliant records
+- **NIO-based I/O** with minimal data copying and shared buffers
+- **Filtering and validation** with expression language
+- **Command-line tools** for common WARC operations
+- **ARC format support** with automatic detection and parsing
+
+## Quick Start
+
+### Basic Usage Example
 
 ```java
 try (WarcReader reader = new WarcReader(FileChannel.open(Paths.get("example.warc")))) {
@@ -14,30 +39,74 @@ try (WarcReader reader = new WarcReader(FileChannel.open(Paths.get("example.warc
 }
 ```
 
+## Technical Details
+
 It uses a finite state machine parser generated from a strict [grammar](https://github.com/iipc/jwarc/blob/master/src/org/netpreserve/jwarc/WarcParser.rl)
 using [Ragel](http://www.colm.net/open-source/ragel/). There is an optional lenient mode which can handle some forms of non-compliant WARC records.
 ARC and HTTP parsing is lenient by default.
 
-Gzipped records are automatically decompressed. The parser interprets ARC/1.1 record as if they are a WARC dialect and
+Gzipped records are automatically decompressed. The library also supports **Zstandard (zstd)** compression for reading and **Brotli** 
+decompression (via optional `org.brotli:dec` dependency). The parser interprets ARC/1.1 records as if they are a WARC dialect and
 populates the appropriate WARC headers.
 
-All I/O is performed using NIO and an an effort is made to minimize data copies and share buffers whenever feasible.
-Direct buffers and even memory-mapped files can be used, but only with uncompressed WARCS until they're supported by
-Inflater (coming in JDK 11).
+All I/O is performed using NIO and an effort is made to minimize data copies and share buffers whenever feasible.
+Direct buffers and even memory-mapped files can be used with uncompressed WARCs.
 
 ## Getting it
 
+### As a Library
+
 To use as a library add jwarc as a dependency from [Maven Central](https://maven-badges.herokuapp.com/maven-central/org.netpreserve/jwarc).
+
+**Maven:**
+```xml
+<dependency>
+    <groupId>org.netpreserve</groupId>
+    <artifactId>jwarc</artifactId>
+    <version>0.32.0</version>
+</dependency>
+```
+
+**Gradle:**
+```gradle
+implementation 'org.netpreserve:jwarc:0.32.0'
+```
+
+### As a Command-Line Tool
 
 To use as a command-line tool install [Java 8 or later](https://adoptopenjdk.net/), download
 the latest [release jar](https://github.com/iipc/jwarc/releases) and run it using:
  
     java -jar jwarc-{version}.jar
 
+### Building from Source
+
 If you would prefer to build it from source install [JDK 8+](https://adoptopenjdk.net/) and 
 [Maven](https://maven.apache.org/) and then run:
 
     mvn package
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on building and developing jwarc.
+
+## Dependencies
+
+### Required
+
+- **Java 8+** (Java 25 recommended for new development)
+- **zstd-jni**: For Zstandard compression support
+
+### Optional
+
+- **org.brotli:dec**: For Brotli decompression support (not included by default)
+
+Add Brotli support to your Maven project:
+```xml
+<dependency>
+    <groupId>org.brotli</groupId>
+    <artifactId>dec</artifactId>
+    <version>0.1.2</version>
+</dependency>
+```
 
 ## Examples
 
@@ -91,63 +160,124 @@ which matches all records that are not image resources or image responses:
      !((warc-type == "resource" && content-type =~ "image/.*") || 
        (warc-type == "response" && http:content-type =~ "image/.*")) 
 
-WarcFilter implements `Predicate<WarcRecord>` and be used to conveniently with streams of records:
+WarcFilter implements `Predicate<WarcRecord>` and can be used conveniently with streams of records:
 
 ```java
 long errorCount = warcReader.records().filter(WarcFilter.compile(":status >= 400")).count();
 ``` 
 
-Their real power though is as a building block for user-supplied options. 
+Their real power though is as a building block for user-supplied options.
+
+## Protocol Support
+
+### HTTP/HTTPS
+
+Full support for parsing HTTP requests and responses, including:
+- Standard and custom headers
+- Chunked transfer encoding
+- Multiple content encodings (gzip, deflate, brotli)
+- Lenient parsing for handling non-compliant HTTP
+
+### Gemini Protocol
+
+jwarc includes support for the [Gemini protocol](https://gemini.circumlunar.space/), a lightweight alternative to HTTP:
+
+- Parse Gemini requests and responses with `GeminiRequest` and `GeminiResponse`
+- Automatic mapping of Gemini status codes to HTTP equivalents
+- Full support for Gemini text/gemini content type
+
+Example:
+```java
+GeminiResponse response = GeminiResponse.parse(channel, buffer);
+System.out.println("Status: " + response.status());
+System.out.println("HTTP equivalent: " + response.statusHttpEquivalent());
+System.out.println("Meta: " + response.meta());
+``` 
 
 ### Command-line tools
 
-jwarc also includes a set of command-lines tools which serve as [examples](src/org/netpreserve/jwarc/tools/). Note that
-many of the tools are lightweight demonstrations and may lack important options and features.
+jwarc also includes a comprehensive set of command-line tools which serve as [examples](src/org/netpreserve/jwarc/tools/). 
 
-Capture a URL (without subresources):
+#### Available Commands
+
+List available commands:
+
+    java -jar jwarc.jar
+
+Get help for a specific command:
+
+    java -jar jwarc.jar <command> --help
+
+#### Tool Examples
+
+**Capture a URL** (without subresources):
 
     java -jar jwarc.jar fetch http://example.org/ > example.warc
 
-Create a CDX file:
+**List records** in a WARC file:
+
+    java -jar jwarc.jar ls example.warc
+
+**Create a CDX file:**
 
     java -jar jwarc.jar cdx example.warc > records.cdx
 
-Run a replay proxy and web server:
+**Extract a record** by offset:
+
+    java -jar jwarc.jar extract example.warc 1234 > record.warc
+
+**Filter records** by criteria:
+
+    java -jar jwarc.jar filter ':status == 200 && http:content-type =~ "text/html(;.*)?"' example.warc > pages.warc
+
+**Deduplicate records:**
+
+    java -jar jwarc.jar dedupe --cache-size 10000 example.warc > deduped.warc
+
+**Validate WARC files:**
+
+    java -jar jwarc.jar validate example.warc
+
+**Print statistics:**
+
+    java -jar jwarc.jar stats example.warc
+
+**Run a replay proxy and web server:**
 
     export PORT=8080
     java -jar jwarc.jar serve example.warc
 
-Replay each page within in a WARC and use [headless Chrome](https://developers.google.com/web/updates/2017/04/headless-chrome)
-to render a screenshot and save it as a resource record:
+**Replay each page** and use [headless Chrome](https://developers.google.com/web/updates/2017/04/headless-chrome)
+to render a screenshot:
 
     export BROWSER=/opt/google/chrome/chrome
     java -jar jwarc.jar screenshot example.warc > screenshots.warc
 
-Running a proxy server which records requests and responses. This will generate self-signed SSL certificates so you will
-will need turn off TLS verification in the client. For Chrome/Chromium use the `--ignore-certificate-errors`
-command-line option.
+**Run a recording proxy** server. This will generate self-signed SSL certificates so you will
+need to turn off TLS verification in the client. For Chrome/Chromium use the `--ignore-certificate-errors`
+command-line option:
 
     export PORT=8080
     java -jar jwarc.jar recorder > example.warc
 
     chromium --proxy-server=http://localhost:8080 --ignore-certificate-errors
 
-Record a command that obeys the http(s)_proxy and CURL_CA_BUNDLE environment variables:
+**Record a command** that obeys the http(s)_proxy and CURL_CA_BUNDLE environment variables:
 
     java -jar jwarc.jar recorder -o example.warc curl http://example.org/
 
-Capture a page by recording headless Chrome:
+**Capture a page** by recording headless Chrome:
 
     export BROWSER=/opt/google/chrome/chrome
     java -jar jwarc.jar record > example.warc
 
-Create a new file containing only html responses with status 200:
+**Save replayed pages** as WARC records:
 
-    java -jar jwarc.jar filter ':status == 200 && http:content-type =~ "text/html(;.*)?"' example.warc > pages.warc 
+    java -jar jwarc.jar saveback http://localhost:8080 > replay.warc 
 
 ## API Quick Reference
 
-See the [javadoc](https://www.javadoc.io/doc/org.netpreserve/jwarc) for more details.
+See the [javadoc](https://www.javadoc.io/doc/org.netpreserve/jwarc) for complete documentation or the [API-REFERENCE.md](API-REFERENCE.md) for a concise quick reference guide.
 
 ### [WarcReader](https://www.javadoc.io/page/org.netpreserve/jwarc/latest/org/netpreserve/jwarc/WarcReader.html)
 
@@ -312,7 +442,7 @@ Note: revisit records never have a payload so
 | Push parsing        | Low level  | ✘               | ✘                    |
 | Folded headers †    | ✔          | ✔               | ✔                    | 
 | [Encoded words] †   | ✘          | ✘ (disabled)    | ✘                    |
-| Validation          | The basics | ✔               | ✘                    |
+| Validation          | Comprehensive | ✔            | ✘                    |
 | Strict parsing  ‡   | ✔          | ✘               | ✘                    |
 | Lenient parsing     | HTTP only  | ✔               | ✔                    |
 | Multi-value headers | ✔          | ✔               | ✘                    |
@@ -320,10 +450,14 @@ Note: revisit records never have a payload so
 | Record type classes | ✔          | ✘               | ✘                    |
 | Typed accessors     | ✔          | ✔               | Some                 |
 | GZIP detection      | ✔          | ✔               | Filename only        |
-| [zstd compression]  | read-only  | ✘               | ✘                    |
-| WARC writer         | Barebones  | ✔               | ✔                    |
+| [zstd compression]  | Read/Write | ✘               | ✘                    |
+| brotli compression  | Read-only  | ✘               | ✘                    |
+| Gemini protocol     | ✔          | ✘               | ✘                    |
+| WARC writer         | ✔          | ✔               | ✔                    |
 | ARC reader          | Auto       | Separate API    | Factory              |
 | ARC writer          | ✘          | ✔               | ✔                    |
+| Header validation   | ✔          | Limited         | ✘                    |
+| Multi-threading     | ✔          | Limited         | ✘                    |
 | Speed * (.warc)     | 1x         | ~5x slower      | ~13x slower          |
 | Speed * (.warc.gz)  | 1x         | ~1.4x slower    | ~2.8x slower         |
 

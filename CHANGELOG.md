@@ -2,9 +2,27 @@
 
 ## Unreleased
 
-### New features
+### New Features
 
-- CdxRecord: added surt(), format(), values() and toString()
+- **Gemini Protocol Support**: Added support for parsing Gemini protocol requests and responses
+  - New classes: `GeminiRequest`, `GeminiResponse`, `GeminiParser`
+  - Gemini status codes mapped to HTTP equivalents for compatibility
+- **Brotli Compression**: Added support for Brotli decompression via `org.brotli:dec` (optional dependency)
+- **Header Validation**: New `HeaderValidator` class for validating WARC headers against standard rules
+- **Enhanced Tools**: Additional command-line tools for WARC manipulation
+  - `ls` - List records in WARC files
+  - `stats` - Print statistics about WARC and CDX files
+  - `saveback` - Save wayback-style replayed pages as WARC records
+- CDX improvements:
+  - `CdxRecord`: added `surt()`, `format()`, `values()` and `toString()` methods
+  - Better CDX format handling and serialization
+
+### Improvements
+
+- Enhanced error messages with source filename and record offset context
+- Multi-threaded support for validation and deduplication operations
+- Improved performance for large WARC file processing
+- Better handling of edge cases in HTTP and WARC parsing
 
 ## 0.32.0
 
