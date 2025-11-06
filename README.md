@@ -4,6 +4,14 @@ A high-performance Java library for reading and writing WARC (Web ARChive) files
 the standard record types as individual classes with typed accessors. The API is extensible and you can register
 extension record types and accessors for extension header fields.
 
+## Documentation
+
+- **[API Reference](API-REFERENCE.md)** - Quick reference guide for common APIs
+- **[Architecture](ARCHITECTURE.md)** - Design and implementation details
+- **[Contributing](CONTRIBUTING.md)** - Guide for developers and contributors
+- **[Changelog](CHANGELOG.md)** - Version history and release notes
+- **[JavaDoc](https://www.javadoc.io/doc/org.netpreserve/jwarc)** - Complete API documentation
+
 ## Features
 
 - **High-level typed API** for WARC record types
@@ -79,6 +87,26 @@ If you would prefer to build it from source install [JDK 8+](https://adoptopenjd
     mvn package
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more details on building and developing jwarc.
+
+## Dependencies
+
+### Required
+
+- **Java 8+** (Java 25 recommended for new development)
+- **zstd-jni**: For Zstandard compression support
+
+### Optional
+
+- **org.brotli:dec**: For Brotli decompression support (not included by default)
+
+Add Brotli support to your Maven project:
+```xml
+<dependency>
+    <groupId>org.brotli</groupId>
+    <artifactId>dec</artifactId>
+    <version>0.1.2</version>
+</dependency>
+```
 
 ## Examples
 
@@ -249,7 +277,7 @@ command-line option:
 
 ## API Quick Reference
 
-See the [javadoc](https://www.javadoc.io/doc/org.netpreserve/jwarc) for more details.
+See the [javadoc](https://www.javadoc.io/doc/org.netpreserve/jwarc) for complete documentation or the [API-REFERENCE.md](API-REFERENCE.md) for a concise quick reference guide.
 
 ### [WarcReader](https://www.javadoc.io/page/org.netpreserve/jwarc/latest/org/netpreserve/jwarc/WarcReader.html)
 
