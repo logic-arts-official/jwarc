@@ -91,7 +91,7 @@ mvn versions:display-dependency-updates
 **Solution**: Your Java version is too old. Install JDK 8 or later.
 
 **Issue**: Maven not found  
-**Solution**: Add Maven to your PATH or use `./mvnw` wrapper if available.
+**Solution**: Add Maven to your PATH.
 
 **Issue**: Tests fail during build  
 **Solution**: Try `mvn clean test` to ensure a fresh build. Check Java version compatibility.
