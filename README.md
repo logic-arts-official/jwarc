@@ -66,7 +66,7 @@ mvn clean package
 java -jar target/jwarc-*.jar
 
 # 4. Or run a specific command
-java -jar target/jwarc-*.jar ls test-resources/*.warc
+java -jar target/jwarc-*.jar ls test-resources/org/netpreserve/jwarc/*.warc.gz
 ```
 
 ### Verify Your Setup
