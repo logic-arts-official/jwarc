@@ -2,6 +2,49 @@
 
 Thank you for your interest in contributing to jwarc! This document provides guidelines and instructions for contributing to the project.
 
+## Quick Start for Contributors
+
+### 5-Minute Setup
+
+```bash
+# 1. Fork the repository on GitHub (click "Fork" button)
+
+# 2. Clone your fork
+git clone https://github.com/YOUR-USERNAME/jwarc.git
+cd jwarc
+
+# 3. Add upstream remote
+git remote add upstream https://github.com/iipc/jwarc.git
+
+# 4. Build and test
+mvn clean package
+
+# 5. Create a feature branch
+git checkout -b feature/your-feature-name
+
+# 6. Make your changes, then test
+mvn test
+
+# 7. Commit and push
+git add .
+git commit -m "Description of your changes"
+git push origin feature/your-feature-name
+
+# 8. Open a Pull Request on GitHub
+```
+
+### Staying Up to Date
+
+```bash
+# Fetch latest changes from upstream
+git fetch upstream
+
+# Merge upstream changes into your branch
+git checkout main
+git merge upstream/main
+git push origin main
+```
+
 ## Getting Started
 
 ### Prerequisites

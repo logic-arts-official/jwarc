@@ -10,6 +10,7 @@ extension record types and accessors for extension header fields.
 - **[Architecture](ARCHITECTURE.md)** - Design and implementation details
 - **[Contributing](CONTRIBUTING.md)** - Guide for developers and contributors
 - **[Changelog](CHANGELOG.md)** - Version history and release notes
+- **[Backlog](BACKLOG.md)** - Future features and enhancements roadmap
 - **[JavaDoc](https://www.javadoc.io/doc/org.netpreserve/jwarc)** - Complete API documentation
 
 ## Features
@@ -38,6 +39,69 @@ try (WarcReader reader = new WarcReader(FileChannel.open(Paths.get("example.warc
     }
 }
 ```
+
+## Quick Developer Setup
+
+Want to contribute or build from source? Get up and running in minutes:
+
+### Prerequisites
+
+- **JDK 8 or later** ([Eclipse Temurin](https://adoptium.net/) or [Oracle JDK](https://www.oracle.com/java/technologies/downloads/) recommended)
+  - Java 25 recommended for new development
+  - JDK 8 minimum for runtime compatibility
+- **Apache Maven 3.6+** ([Download](https://maven.apache.org/download.cgi))
+- **Git** ([Download](https://git-scm.com/downloads))
+
+### Get Up and Running
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/iipc/jwarc.git
+cd jwarc
+
+# 2. Build the project (includes running tests)
+mvn clean package
+
+# 3. Run the command-line tool
+java -jar target/jwarc-0.32.1-SNAPSHOT.jar
+
+# 4. Or run a specific command
+java -jar target/jwarc-0.32.1-SNAPSHOT.jar ls test-resources/*.warc
+```
+
+### Verify Your Setup
+
+```bash
+# Run all tests
+mvn test
+
+# Build without tests (faster)
+mvn package -DskipTests
+
+# Generate JavaDoc
+mvn javadoc:javadoc
+
+# Check for dependency updates
+mvn versions:display-dependency-updates
+```
+
+### Common Issues
+
+**Issue**: `java.lang.UnsupportedClassVersionError`  
+**Solution**: Your Java version is too old. Install JDK 8 or later.
+
+**Issue**: Maven not found  
+**Solution**: Add Maven to your PATH or use `./mvnw` wrapper if available.
+
+**Issue**: Tests fail during build  
+**Solution**: Try `mvn clean test` to ensure a fresh build. Check Java version compatibility.
+
+### Next Steps
+
+- Read the [Contributing Guide](CONTRIBUTING.md) for detailed development guidelines
+- Check the [Architecture](ARCHITECTURE.md) document to understand the codebase
+- Browse [open issues](https://github.com/iipc/jwarc/issues) for contribution ideas
+- Review the [Backlog](BACKLOG.md) for upcoming features
 
 ## Technical Details
 
@@ -432,6 +496,78 @@ No methods are specific to resource records. See WarcRecord, WarcTargetRecord, W
 ```
 
 Note: revisit records never have a payload so 
+
+## Pros and Cons
+
+### Advantages of jwarc
+
+**Performance**
+- ✅ **Fastest Java WARC library**: Up to 5-13x faster than alternatives for uncompressed WARCs
+- ✅ **NIO-based architecture**: Minimal memory copying, efficient buffer management
+- ✅ **Multi-threading support**: Parallel processing for validation and deduplication
+- ✅ **Ragel FSM parser**: Highly optimized state machine for parsing speed
+
+**Modern Design**
+- ✅ **Type-safe API**: Strongly-typed classes for each WARC record type
+- ✅ **Java 8+ features**: Streams, Optional, Instant, and modern idioms
+- ✅ **Immutable records**: Thread-safe, predictable behavior
+- ✅ **Builder pattern**: Clean, fluent API for record construction
+
+**Feature Rich**
+- ✅ **Multiple compression formats**: GZIP, Zstandard (zstd), and Brotli support
+- ✅ **Protocol support**: HTTP/1.x, HTTPS, Gemini protocol
+- ✅ **Comprehensive validation**: Built-in WARC 1.1 header validation
+- ✅ **Filter expressions**: DSL for powerful record filtering
+- ✅ **Command-line tools**: 15+ tools for WARC manipulation
+- ✅ **ARC format support**: Automatic detection and parsing
+
+**Developer Experience**
+- ✅ **Well documented**: Extensive JavaDoc, guides, and examples
+- ✅ **Active maintenance**: Regular updates and bug fixes
+- ✅ **Apache 2.0 license**: Permissive open-source license
+- ✅ **Maven Central**: Easy integration into projects
+
+### Limitations
+
+**Format Support**
+- ❌ **No ARC writing**: Cannot create ARC format files (WARC is preferred)
+- ⚠️ **Brotli read-only**: Brotli compression is decompression-only
+- ⚠️ **Limited HTTP/2**: No HTTP/2 protocol support yet
+
+**Compatibility**
+- ⚠️ **Java 8 minimum**: Requires JDK 8 or later (modern for most, but not all environments)
+- ⚠️ **Strict parsing by default**: May reject some non-compliant WARCs (lenient mode available)
+
+**Advanced Features**
+- ⚠️ **No in-place editing**: Cannot modify existing WARC records in place
+- ⚠️ **Limited async I/O**: Not fully asynchronous (future enhancement)
+- ⚠️ **No built-in indexing**: Must generate indices separately
+
+### When to Choose jwarc
+
+**Best suited for:**
+- High-performance WARC processing applications
+- Modern Java projects (8+)
+- Applications requiring strict WARC 1.1 compliance
+- Projects needing modern compression (zstd)
+- Command-line WARC manipulation and analysis
+- Web archiving systems requiring validation
+
+**Consider alternatives when:**
+- You need ARC format writing capability
+- Working with legacy Java environments (< Java 8)
+- You require HTTP/2 protocol support
+- In-place WARC editing is essential
+
+### Migration from Other Libraries
+
+If you're migrating from **JWAT** or **webarchive-commons**, jwarc offers:
+- Significant performance improvements (1.4x - 13x faster)
+- Type-safe API reducing errors
+- Better documentation and examples
+- Active maintenance and modern features
+
+See the [Comparison](#comparison) section below for detailed feature comparison.
 
 ## Comparison
 
