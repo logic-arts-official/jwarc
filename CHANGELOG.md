@@ -24,6 +24,19 @@
 - Improved performance for large WARC file processing
 - Better handling of edge cases in HTTP and WARC parsing
 
+### Documentation
+
+- **Comprehensive documentation updates**: All documentation files recreated and enhanced
+- **New BACKLOG.md**: Detailed roadmap of future features and enhancements
+- **Enhanced README.md**: Added Quick Developer Setup, Pros/Cons section, and Backlog reference
+- **Improved CONTRIBUTING.md**: Added 5-minute quick start guide for contributors
+- **Developer-friendly**: Better "check out and get up and running" instructions
+
+### Dependencies
+
+- Updated `com.github.luben:zstd-jni` from 1.5.7-4 to 1.5.7-6
+- Updated `org.sonatype.central:central-publishing-maven-plugin` from 0.8.0 to 0.9.0
+
 ## 0.32.0
 
 ### Added
