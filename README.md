@@ -63,10 +63,10 @@ cd jwarc
 mvn clean package
 
 # 3. Run the command-line tool
-java -jar target/jwarc-0.32.1-SNAPSHOT.jar
+java -jar target/jwarc-*.jar
 
 # 4. Or run a specific command
-java -jar target/jwarc-0.32.1-SNAPSHOT.jar ls test-resources/*.warc
+java -jar target/jwarc-*.jar ls test-resources/*.warc
 ```
 
 ### Verify Your Setup
